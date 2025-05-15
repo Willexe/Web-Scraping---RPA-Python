@@ -4,53 +4,65 @@ from selenium.webdriver.common.by import By
 import time
 import pandas as pd
 
-service = Service()
-options = webdriver.ChromeOptions()
-driver = webdriver.Chrome(service=service, options=options)
-url = "https://quotes.toscrape.com/js-delayed/page/{}/" #URL para web scraping
+def iniciar_driver():  # Configurações do webdriver
+    service = Service()
+    options = webdriver.ChromeOptions()
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
 
-page = 1 # Conta paginas
-dados = [] # Lista de dados
+def extrair_dados_pagina(driver, url):  # Extrai os dados de uma página
+    driver.get(url)
+    time.sleep(11)
+    quotes = driver.find_elements(By.CLASS_NAME, "quote")
+    dados = []
 
-while True:
+    for quote in quotes:
+        text = quote.find_element(By.CLASS_NAME, "text").text
+        author = quote.find_element(By.CLASS_NAME, "author").text
+        tag = quote.find_element(By.CLASS_NAME, "tags").text
+        print(f"{text}")
+        print(f"{author}")
+        print(f"{tag}")
+
+        dados.append({
+            'Citação': text,
+            'Autor': author,
+            'Tags': tag
+        })
+
+    return dados
+
+def proxima_pagina(driver):  # Verifica se existe botão "Next"
     try:
-        # Acessa a url
-        driver.get(url.format(page))
-        
-        # Espera para carregar as citações
-        time.sleep(11) 
+        driver.find_element(By.CLASS_NAME, "next")
+        return True
+    except:
+        return False
 
-        # Encontra a class "quote""
-        quotes = driver.find_elements(By.CLASS_NAME, "quote")
+def salvar_em_csv(dados, nome_arquivo="quotes.csv"):  # Salva os dados em CSV
+    df = pd.DataFrame(dados)
+    df.to_csv(nome_arquivo, index=False, encoding="utf-8")
+    print("Citações salvas em quotes.csv")
 
-        # Percorre o site pegando os dados (Citação, Autor, Tags)
-        for quote in quotes:
-            text = quote.find_element(By.CLASS_NAME, "text").text
-            author = quote.find_element(By.CLASS_NAME, "author").text
-            tag = quote.find_element(By.CLASS_NAME, "tags").text
-            print(f"{text}")
-            print(f"{author}")
-            print(f"{tag}")
+def main(): # Percorre todas as paginas e extrai os dados
+    driver = iniciar_driver()
+    base_url = "https://quotes.toscrape.com/js-delayed/page/{}/"
+    page = 1
+    todas_citacoes = []
 
-            # Armazena os dados na lista
-            dados.append({
-                'Citação': text,
-                'Autor': author,
-                'Tags': tag
-            })
+    while True:
+        dados = extrair_dados_pagina(driver, base_url.format(page))
+        todas_citacoes.extend(dados)
 
-        # Avança para as proximas páginas
-        try:
-            next_button = driver.find_element(By.CLASS_NAME, "next")
+        if proxima_pagina(driver):
             page += 1
             time.sleep(1.5)
-        except:
+        else:
             break
-    except:
-        break
+    salvar_em_csv(todas_citacoes)
+    time.sleep(10)
 
-# Cria DataFrame e salva como CSV
-df = pd.DataFrame(dados)
-df.to_csv("quotes.csv", index=False, encoding="utf-8")
 
-time.sleep(100)
+
+if __name__ == "__main__":
+    main()
