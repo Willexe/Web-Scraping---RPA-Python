@@ -3,6 +3,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
 import pandas as pd
+from collections import Counter
 
 def iniciar_driver():  # Configurações do webdriver
     service = Service()
@@ -19,15 +20,15 @@ def extrair_dados_pagina(driver, url):  # Extrai os dados de uma página
     for quote in quotes:
         text = quote.find_element(By.CLASS_NAME, "text").text
         author = quote.find_element(By.CLASS_NAME, "author").text
-        tag = quote.find_element(By.CLASS_NAME, "tags").text
+        tags = ", ".join([tag.text for tag in quote.find_elements(By.CLASS_NAME, "tag")])
         print(f"{text}")
         print(f"{author}")
-        print(f"{tag}")
+        print(f"{tags}")
 
         dados.append({
             'Citação': text,
             'Autor': author,
-            'Tags': tag
+            'Tags': tags
         })
 
     return dados
@@ -43,6 +44,24 @@ def salvar_em_csv(dados, nome_arquivo="quotes.csv"):  # Salva os dados em CSV
     df = pd.DataFrame(dados)
     df.to_csv(nome_arquivo, index=False, encoding="utf-8")
     print("Citações salvas em quotes.csv")
+
+def leitura_e_analise():
+    df = pd.read_csv("quotes.csv")
+    total_citacoes = len(df)
+    autor_mais_recorrente = df["Autor"].value_counts().idxmax()
+    autor_qtd = df["Autor"].value_counts().max()
+
+    todas_tags = []
+    for tags in df["Tags"]:
+        tags_separadas = [tag.strip() for tag in str(tags).split(',')]
+        todas_tags.extend(tags_separadas)
+
+    tag_mais_comum, tag_qtd = Counter(todas_tags).most_common(1)[0]
+
+    print(f"Total de citações: {total_citacoes}")
+    print(f"Autor mais recorrente: {autor_mais_recorrente} ({autor_qtd} vezes)")
+    print(f"Tag mais utilizada: {tag_mais_comum} ({tag_qtd} vezes)")
+    
 
 def main(): # Percorre todas as paginas e extrai os dados
     driver = iniciar_driver()
@@ -60,7 +79,8 @@ def main(): # Percorre todas as paginas e extrai os dados
         else:
             break
     salvar_em_csv(todas_citacoes)
-    time.sleep(10)
+    leitura_e_analise()
+    time.sleep(100)
 
 
 
