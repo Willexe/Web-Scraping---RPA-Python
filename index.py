@@ -5,13 +5,15 @@ import time
 import pandas as pd
 from collections import Counter
 
-def iniciar_driver():  # Configurações do webdriver
+# Configurações do webdriver
+def iniciar_driver():  
     service = Service()
     options = webdriver.ChromeOptions()
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
-def extrair_dados_pagina(driver, url):  # Extrai os dados de uma página
+# Extrai os dados de uma página
+def extrair_dados_pagina(driver, url):  
     driver.get(url)
     time.sleep(11)
     quotes = driver.find_elements(By.CLASS_NAME, "quote")
@@ -33,19 +35,22 @@ def extrair_dados_pagina(driver, url):  # Extrai os dados de uma página
 
     return dados
 
-def proxima_pagina(driver):  # Verifica se existe botão "Next"
+# Verifica se existe botão "Next"
+def proxima_pagina(driver):  
     try:
         driver.find_element(By.CLASS_NAME, "next")
         return True
     except:
         return False
-
-def salvar_em_csv(dados, nome_arquivo="quotes.csv"):  # Salva os dados em CSV
+    
+# Salva os dados em CSV
+def salvar_em_csv(dados, nome_arquivo="quotes.csv"):  
     df = pd.DataFrame(dados)
     df.to_csv(nome_arquivo, index=False, encoding="utf-8")
-    print("Citações salvas em quotes.csv")
+    print("Dados salvos em quotes.csv")
 
-def leitura_e_analise():
+# Ler e analisa a planilha os dados salvos no arquivo CSV depois retorna os dados solicitados
+def leitura_e_analise(): 
     df = pd.read_csv("quotes.csv")
     total_citacoes = len(df)
     autor_mais_recorrente = df["Autor"].value_counts().idxmax()
@@ -62,8 +67,8 @@ def leitura_e_analise():
     print(f"Autor mais recorrente: {autor_mais_recorrente} ({autor_qtd} vezes)")
     print(f"Tag mais utilizada: {tag_mais_comum} ({tag_qtd} vezes)")
     
-
-def main(): # Percorre todas as paginas e extrai os dados
+# Percorre todas as paginas, extrai os dados, salva em csv, lê a planilha e processa os dados
+def main(): 
     driver = iniciar_driver()
     base_url = "https://quotes.toscrape.com/js-delayed/page/{}/"
     page = 1
@@ -80,9 +85,7 @@ def main(): # Percorre todas as paginas e extrai os dados
             break
     salvar_em_csv(todas_citacoes)
     leitura_e_analise()
-    time.sleep(100)
-
-
-
+    driver.quit()
+    
 if __name__ == "__main__":
     main()
