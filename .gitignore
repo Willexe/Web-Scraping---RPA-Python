@@ -1,0 +1,9 @@
+# Ignora a pasta de ambiente virtual
+venv/
+
+# Ignora arquivos de cache do Python
+__pycache__/
+*.pyc
+
+# Ignora arquivos de dados gerados pelo script
+*.csv
