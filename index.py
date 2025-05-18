@@ -4,6 +4,9 @@ from selenium.webdriver.common.by import By
 import time
 import pandas as pd
 from collections import Counter
+from SendEmail import enviar_email_com_anexo
+from dotenv import load_dotenv
+import os
 
 # Configurações do webdriver
 def iniciar_driver():  
@@ -46,10 +49,10 @@ def proxima_pagina(driver):
 # Salva os dados em CSV
 def salvar_em_csv(dados, nome_arquivo="quotes.csv"):  
     df = pd.DataFrame(dados)
-    df.to_csv(nome_arquivo, index=False, encoding="utf-8")
+    df.to_csv(nome_arquivo, index=False, encoding="utf-8-sig")
     print("Dados salvos em quotes.csv")
 
-# Ler e analisa a planilha os dados salvos no arquivo CSV depois retorna os dados solicitados
+# Ler e analisa a planilha os dados salvos no arquivo CSV depois separa: Total de citações, Autor mais recorrente, Tag mais usada
 def leitura_e_analise(): 
     df = pd.read_csv("quotes.csv")
     total_citacoes = len(df)
@@ -63,10 +66,24 @@ def leitura_e_analise():
 
     tag_mais_comum, tag_qtd = Counter(todas_tags).most_common(1)[0]
 
+    # Criação das colunas e linhas da planilha Resumo_analise
+    resumo_dict = {
+        "Descrição": ["Total de citações", "Autor mais recorrente", "Tag mais usada"],
+        "Valor": [total_citacoes, autor_mais_recorrente, tag_mais_comum],
+        "Quantidade": ["", autor_qtd, tag_qtd]
+    }
+
+    # Retorno no console dos dados: Total de citações, Autor mais recorrente, Tag mais usada
     print(f"Total de citações: {total_citacoes}")
     print(f"Autor mais recorrente: {autor_mais_recorrente} ({autor_qtd} vezes)")
     print(f"Tag mais utilizada: {tag_mais_comum} ({tag_qtd} vezes)")
-    
+
+    # Criação da planilha
+    resumo_df = pd.DataFrame(resumo_dict)
+    resumo_df.to_csv("Resumo_analise.csv", index=False, encoding="utf-8-sig")
+    print("Resumo Salvo em resumo_analise.csv")
+    return total_citacoes, autor_mais_recorrente, autor_qtd, tag_mais_comum, tag_qtd
+
 # Percorre todas as paginas, extrai os dados, salva em csv, lê a planilha e processa os dados
 def main(): 
     driver = iniciar_driver()
@@ -83,9 +100,45 @@ def main():
             time.sleep(1.5)
         else:
             break
+
+    # Captura as variavéis da função leitura_e_analise para usar no body do email
+    total, autor, autor_vezes, tag, tag_vezes = leitura_e_analise()
+
     salvar_em_csv(todas_citacoes)
     leitura_e_analise()
     driver.quit()
+
+    # Titulo do email
+    subject = "Web-Scraping - RPA-Python - Desafio"
+
+    # Descrição
+    body = (
+        "Prezado,\n\n"
+        "Segue em anexo os arquivos `quotes.csv` com as citações coletadas e `Resumo_analise.csv` com o resumo de dados.\n"
+        f"Resumo da análise:\n\n"
+        f"Total de citações: {total}\n"
+        f"Autor mais recorrente: {autor}({autor_vezes} vezes)\n"
+        f"Tag mais utilizada: {tag} ({tag_vezes} vezes)\n\n"
+        "Atenciosamente,\n"
+        "SeuNome"
+    )
+
+    # Carrega os arquivos .env (Armazena credenciais sensíveis)
+    load_dotenv()
+
+    # Pega os dados salvos no .env
+    sender_email = os.getenv("EMAIL_REMETENTE")
+    password = os.getenv("SENHA")
+    receiver_email = os.getenv("EMAIL_DESTINATARIOS").split(",")
     
+    # Chama a função no SendEmail.py com os dados sensivéis (Email's e Senha) do .env
+    enviar_email_com_anexo(
+        sender=sender_email,
+        password=password,
+        recipient=receiver_email,
+        subject=subject,
+        body=body,
+        arquivos= ["quotes.csv", "Resumo_analise.csv"]
+    )
 if __name__ == "__main__":
     main()
