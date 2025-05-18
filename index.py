@@ -101,10 +101,11 @@ def main():
         else:
             break
 
+    salvar_em_csv(todas_citacoes)
+
     # Captura as variavéis da função leitura_e_analise para usar no body do email
     total, autor, autor_vezes, tag, tag_vezes = leitura_e_analise()
-
-    salvar_em_csv(todas_citacoes)
+    
     leitura_e_analise()
     driver.quit()
 
@@ -120,7 +121,7 @@ def main():
         f"Autor mais recorrente: {autor}({autor_vezes} vezes)\n"
         f"Tag mais utilizada: {tag} ({tag_vezes} vezes)\n\n"
         "Atenciosamente,\n"
-        "SeuNome"
+        "William Barbosa"
     )
 
     # Carrega os arquivos .env (Armazena credenciais sensíveis)
