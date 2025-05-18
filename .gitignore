@@ -6,5 +6,5 @@ __pycache__/
 *.pyc
 
 # Ignora arquivos de ambiente (contêm senhas e chaves)
-.env
+
 
