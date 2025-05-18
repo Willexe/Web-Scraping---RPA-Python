@@ -25,7 +25,7 @@ pip install -r requirements.txt
 
 (Irá instalar todas as dependêcias)
 
-#### No arquivo .env substitua o e-mail do remetente, senha (Para contas Gmail, ative a autenticação de dois fatores e crie uma senha de aplicativo), e-mail do destinatário
+#### No arquivo .env substitua o e-mail do remetente, senha (Para contas Gmail, ative a autenticação de dois fatores e crie uma senha de aplicativo), e-mail do destinatário, após isso coloque .env no gitignore para que suas credencias não sejam colocadas no GitHub
 
 #### Por fim execute o projeto no terminal
 - python index.py
