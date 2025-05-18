@@ -7,3 +7,6 @@ __pycache__/
 
 # Ignora arquivos de dados gerados pelo script
 *.csv
+
+#Ignora o .gitignore
+.gitignore
