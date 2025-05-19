@@ -17,11 +17,13 @@ No final envia os arquivos por e-mail com o resumo no corpo da mensagem e a plan
 
 
 #### Para executar o programa da melhor forma é necessario:
+* Instalar o Git
+* Abrir o terminal e executar ' Git clone https://github.com/Willexe/Web-Scraping---RPA-Python.git '
 * Instalar o Python
-* Instalar o Selenium (pip install selenium)
-* Instalar o Pandas (pip install pandas)
+* pip install -r requirements.txt
 
-pip install -r requirements.txt 
+  Após isso ele vai instalar as dependências contidas no arquivo requirements.txt
+
 
 (Irá instalar todas as dependêcias)
 
