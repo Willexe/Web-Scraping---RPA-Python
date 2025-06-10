@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 import pandas as pd
 from collections import Counter
@@ -18,7 +20,8 @@ def iniciar_driver():
 # Extrai os dados de uma página
 def extrair_dados_pagina(driver, url):  
     driver.get(url)
-    time.sleep(11)
+    WebDriverWait(driver, 10).until(
+    EC.presence_of_all_elements_located((By.CLASS_NAME, "quote")))
     quotes = driver.find_elements(By.CLASS_NAME, "quote")
     dados = []
 
